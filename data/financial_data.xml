@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="../public/financial_data.xsl"?>
+<financialData>
+  <budgets>
+    <budget category="Expenses" amount="2500.00" period="monthly"/>
+    <budget category="Income" amount="4000.00" period="monthly"/>
+  </budgets>
+  <transactions>
+    <transaction id="1">
+      <date>2025-05-01</date>
+      <description>Monthly rent</description>
+      <amount>-1200.00</amount>
+      <type>Expenses</type>
+      <category>Chirie</category>
+    </transaction>
+    <transaction id="2">
+      <date>2025-05-01</date>
+      <description>Homeowners association fee</description>
+      <amount>-100.00</amount>
+      <type>Expenses</type>
+      <category>Asociație</category>
+    </transaction>
+    <transaction id="3">
+      <date>2025-05-02</date>
+      <description>Utility bill</description>
+      <amount>-80.00</amount>
+      <type>Expenses</type>
+      <category>Electricitate</category>
+    </transaction>
+    <transaction id="4">
+      <date>2025-05-02</date>
+      <description>Internet bill</description>
+      <amount>-50.00</amount>
+      <type>Expenses</type>
+      <category>Internet</category>
+    </transaction>
+    <transaction id="5">
+      <date>2025-05-03</date>
+      <description>Subscription payment</description>
+      <amount>-30.00</amount>
+      <type>Expenses</type>
+      <category>Abonamente</category>
+    </transaction>
+    <transaction id="6">
+      <date>2025-05-03</date>
+      <description>Weekly groceries</description>
+      <amount>-150.00</amount>
+      <type>Expenses</type>
+      <category>Groceries</category>
+    </transaction>
+    <transaction id="7">
+      <date>2025-05-04</date>
+      <description>Personal expenses</description>
+      <amount>-200.00</amount>
+      <type>Expenses</type>
+      <category>For me</category>
+      <rating>4</rating>
+    </transaction>
+    <transaction id="8">
+      <date>2025-05-04</date>
+      <description>Household expenses</description>
+      <amount>-300.00</amount>
+      <type>Expenses</type>
+      <category>House</category>
+      <rating>3</rating>
+    </transaction>
+    <transaction id="9">
+      <date>2025-05-05</date>
+      <description>Monthly salary</description>
+      <amount>2500.00</amount>
+      <type>Income</type>
+      <category/>
+    </transaction>
+    <transaction id="10">
+      <date>2025-05-11</date>
+      <description>Homeowners association fee</description>
+      <amount>-200.00</amount>
+      <type>Expenses</type>
+      <category>Asociație</category>
+    </transaction>
+    <transaction id="11">
+      <date>2025-05-14</date>
+      <description>Utility bill</description>
+      <amount>-60.00</amount>
+      <type>Expenses</type>
+      <category>Electricitate</category>
+    </transaction>
+    <transaction id="15">
+      <date>2025-05-15</date>
+      <description>cercei</description>
+      <amount>200.00</amount>
+      <type>Expenses</type>
+      <category>For me</category>
+      <rating>5</rating>
+    </transaction>
+    <transaction id="13">
+      <date>2025-05-18</date>
+      <description>Sapuniera</description>
+      <amount>20.00</amount>
+      <type>Expenses</type>
+      <category>For me</category>
+      <rating>5</rating>
+    </transaction>
+  </transactions>
+  <deadlines>
+    <deadline id="2">
+      <description>Homeowners association fee</description>
+      <amount>-100.00</amount>
+      <type>Expenses</type>
+      <category>Asociație</category>
+      <due_date>01</due_date>
+      <recurrence>monthly</recurrence>
+      <recurrence_interval/>
+    </deadline>
+    <deadline id="3">
+      <description>Utility bill</description>
+      <amount>-80.00</amount>
+      <type>Expenses</type>
+      <category>Electricitate</category>
+      <due_date>02</due_date>
+      <recurrence>monthly</recurrence>
+      <recurrence_interval/>
+    </deadline>
+    <deadline id="4">
+      <description>Internet bill</description>
+      <amount>-50.00</amount>
+      <type>Expenses</type>
+      <category>Internet</category>
+      <due_date>02</due_date>
+      <recurrence>monthly</recurrence>
+      <recurrence_interval/>
+    </deadline>
+    <deadline id="5">
+      <description>Monthly salary</description>
+      <amount>2500.00</amount>
+      <type>Income</type>
+      <category/>
+      <due_date>05</due_date>
+      <recurrence>monthly</recurrence>
+      <recurrence_interval/>
+    </deadline>
+  </deadlines>
+</financialData>
