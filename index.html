@@ -176,6 +176,14 @@
 <div class="dashboard-card analytics">
   <h3>Analytics</h3>
   <div id="analytics-summary"></div>
+  <div class="export-controls">
+    <select id="exportFormat">
+      <option value="csv">CSV</option>
+      <option value="xml">XML</option>
+      <option value="pdf">PDF</option>
+    </select>
+    <button id="export-analytics" class="btn btn-primary">Export Transactions</button>
+  </div>
 </div>
     <div class="dashboard-card insights">
   <h3>Happiness Insights</h3>
@@ -205,9 +213,9 @@
 
 <div class="chart-calendar-container">
   <section class="chart-section">
-    <h2>Expenses Breakdown</h2>
-    <canvas id="analyticsChart"></canvas>
-  </section>
+  <h2>Expenses Breakdown</h2>
+  <canvas id="analyticsChart"></canvas>
+</section>
   <section class="calendar-section">
     <h2>Deadlines Calendar</h2>
     <div id="calendar"></div>

@@ -458,3 +458,31 @@ td.negative {
     grid-template-columns: 1fr;
   }
 }
+
+.dashboard-card.analytics .export-controls {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.dashboard-card.analytics #exportFormat {
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  background-color: var(--background);
+  color: var(--text);
+  font-size: 0.875rem;
+  min-width: 100px;
+}
+
+.dashboard-card.analytics #exportFormat:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.dashboard-card.analytics #export-analytics {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}

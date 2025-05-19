@@ -14,6 +14,18 @@ if (localStorage.getItem('theme') === 'dark') {
   document.body.classList.add('dark-mode');
 }
 
+  const exportButton = document.getElementById('export-analytics');
+  const exportFormat = document.getElementById('exportFormat');
+  if (exportButton && exportFormat) {
+    exportButton.addEventListener('click', () => {
+      const format = exportFormat.value;
+      console.log('Export button clicked, format:', format);
+      exportTransactions(format);
+    });
+  } else {
+    console.error('Export button or format selector not found');
+  }
+
 function initializeApp() {
   loadTransactions();
   initializeCalendar();
