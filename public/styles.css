@@ -323,9 +323,9 @@ td.negative {
   margin: 1rem 0;
 }
 
-.rating-group input {
+/* .rating-group input {
   display: none;
-}
+} */
 
 .rating-group label {
   cursor: pointer;
@@ -485,4 +485,40 @@ td.negative {
 .dashboard-card.analytics #export-analytics {
   padding: 0.5rem 1rem;
   font-size: 0.875rem;
+}
+
+#budget-display {
+  margin-top: 1rem;
+}
+#budget-display h4 {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+  color: var(--text);
+}
+#budget-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.budget-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.budget-item span {
+  flex: 1;
+}
+.budget-amount {
+  color: #007bff;
+}
+.btn-small {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+}
+.btn-danger {
+  background-color: #dc3545;
+  color: white;
+}
+.btn-danger:hover {
+  background-color: #c82333;
 }

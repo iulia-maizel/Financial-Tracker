@@ -2,8 +2,9 @@
 <?xml-stylesheet type="text/xsl" href="../public/financial_data.xsl"?>
 <financialData>
   <budgets>
-    <budget category="Expenses" amount="2500.00" period="monthly"/>
-    <budget category="Income" amount="4000.00" period="monthly"/>
+    <budget id="1634567890001" category="Expenses" amount="2500.00" period="monthly"/>
+    <budget id="1634567890002" category="Income" amount="4000.00" period="monthly"/>
+    <budget category="Travel budapesta" amount="1000.00" period="monthly"/>
   </budgets>
   <transactions>
     <transaction id="1">
@@ -101,6 +102,46 @@
       <category>For me</category>
       <rating>5</rating>
     </transaction>
+    <transaction id="15">
+      <date>2025-05-27</date>
+      <description>cafea</description>
+      <amount>25.00</amount>
+      <type>Expenses</type>
+      <category>Chirie</category>
+      <rating/>
+    </transaction>
+    <transaction id="16">
+      <date>2025-05-27</date>
+      <description>manusi</description>
+      <amount>10.00</amount>
+      <type>Expenses</type>
+      <category>House</category>
+      <rating>3</rating>
+    </transaction>
+    <transaction id="17">
+      <date>2025-05-22</date>
+      <description>Cafea</description>
+      <amount>15.00</amount>
+      <type>Expenses</type>
+      <category>For me</category>
+      <rating>2</rating>
+    </transaction>
+    <transaction id="18">
+      <date>2025-05-21</date>
+      <description>Cafea</description>
+      <amount>30.00</amount>
+      <type>Expenses</type>
+      <category>For me</category>
+      <rating>5</rating>
+    </transaction>
+    <transaction id="18">
+      <date>2025-06-13</date>
+      <description>cercei</description>
+      <amount>20.00</amount>
+      <type>Expenses</type>
+      <category>For me</category>
+      <rating>5</rating>
+    </transaction>
   </transactions>
   <deadlines>
     <deadline id="2">
@@ -121,21 +162,12 @@
       <recurrence>monthly</recurrence>
       <recurrence_interval/>
     </deadline>
-    <deadline id="4">
-      <description>Internet bill</description>
-      <amount>-50.00</amount>
-      <type>Expenses</type>
-      <category>Internet</category>
-      <due_date>02</due_date>
-      <recurrence>monthly</recurrence>
-      <recurrence_interval/>
-    </deadline>
     <deadline id="5">
-      <description>Monthly salary</description>
-      <amount>2500.00</amount>
-      <type>Income</type>
+      <description>Curent</description>
+      <amount>50.00</amount>
+      <type>Expenses</type>
       <category/>
-      <due_date>05</due_date>
+      <due_date>15</due_date>
       <recurrence>monthly</recurrence>
       <recurrence_interval/>
     </deadline>

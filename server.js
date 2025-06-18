@@ -451,6 +451,42 @@ app.delete('/api/deadlines/:id', (req, res) => {
   });
 });
 
+app.delete('/api/budgets/:category/:period', (req, res) => {
+  const { category, period } = req.params;
+  fs.readFile('data/financial_data.xml', 'utf8', (err, data) => {
+    if (err) {
+      console.error('Error reading XML:', err);
+      return res.status(500).send('Error reading XML');
+    }
+    xml2js.parseString(data, { trim: true }, (err, result) => {
+      if (err) {
+        console.error('Error parsing XML:', err);
+        return res.status(500).send('Error parsing XML');
+      }
+      let budgets = result.financialData.budgets?.[0]?.budget || [];
+      const initialLength = budgets.length;
+      budgets = budgets.filter(b => !(b.$.category === category && b.$.period === period));
+      if (budgets.length === initialLength) {
+        return res.status(404).send('Budget not found');
+      }
+      result.financialData.budgets[0].budget = budgets;
+      const builder = new xml2js.Builder({
+        xmldec: { version: '1.0', encoding: 'UTF-8' },
+        renderOpts: { pretty: true }
+      });
+      let xmlOutput = builder.buildObject(result);
+      const finalXmlOutput = `<?xml version="1.0" encoding="UTF-8"?>\n<?xml-stylesheet type="text/xsl" href="../public/financial_data.xsl"?>\n${xmlOutput.replace('<?xml version="1.0" encoding="UTF-8"?>', '').trim()}`;
+      fs.writeFile('data/financial_data.xml', finalXmlOutput, (err) => {
+        if (err) {
+          console.error('Error writing XML:', err);
+          return res.status(500).send('Error writing XML');
+        }
+        res.json({ message: 'Budget deleted' });
+      });
+    });
+  });
+});
+
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });

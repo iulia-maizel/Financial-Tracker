@@ -6,40 +6,66 @@ document.addEventListener('DOMContentLoaded', () => {
   initializeApp();
 });
 
-document.getElementById('theme-toggle').addEventListener('click', () => {
-  document.body.classList.toggle('dark-mode');
-  localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
-});
-if (localStorage.getItem('theme') === 'dark') {
-  document.body.classList.add('dark-mode');
-}
-
-  const exportButton = document.getElementById('export-analytics');
-  const exportFormat = document.getElementById('exportFormat');
-  if (exportButton && exportFormat) {
-    exportButton.addEventListener('click', () => {
-      const format = exportFormat.value;
-      console.log('Export button clicked, format:', format);
-      exportTransactions(format);
-    });
-  } else {
-    console.error('Export button or format selector not found');
-  }
-
 function initializeApp() {
   loadTransactions();
   initializeCalendar();
-  document.getElementById('transaction-form').addEventListener('submit', addTransaction);
-  document.getElementById('budget-form').addEventListener('submit', setBudget);
-  document.getElementById('deadline-form').addEventListener('submit', addDeadline);
-  document.getElementById('categoryFilter').addEventListener('change', loadTransactions);
-  document.getElementById('secondaryCategoryFilter').addEventListener('change', loadTransactions);
+  const transactionForm = document.getElementById('transaction-form');
+  const budgetForm = document.getElementById('budget-form');
+  const deadlineForm = document.getElementById('deadline-form');
+  const categoryFilter = document.getElementById('categoryFilter');
+  const secondaryCategoryFilter = document.getElementById('secondaryCategoryFilter');
+  const budgetSelect = document.getElementById('budget-select');
+  const exportButton = document.getElementById('export-analytics');
+  const exportFormat = document.getElementById('exportFormat');
+  const themeToggle = document.getElementById('theme-toggle');
+
+  if (transactionForm) transactionForm.addEventListener('submit', addTransaction);
+  if (budgetForm) budgetForm.addEventListener('submit', setBudget);
+  if (deadlineForm) deadlineForm.addEventListener('submit', addDeadline);
+  if (categoryFilter) categoryFilter.addEventListener('change', loadTransactions);
+  if (secondaryCategoryFilter) secondaryCategoryFilter.addEventListener('change', loadTransactions);
+  if (budgetSelect) budgetSelect.addEventListener('change', loadBudget);
+  if (exportButton && exportFormat) exportButton.addEventListener('click', () => exportTransactions(exportFormat.value));
+  if (themeToggle) {
+    themeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+    });
+  }
+
+  if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
+
   loadBudgetOptions();
+  updateCategoryDropdown();
+  updateDdlCategoryDropdown();
 }
 
 function toggleCustomInterval() {
-  const recurrence = document.getElementById('ddl-recurrence').value;
-  document.getElementById('custom-interval-label').style.display = recurrence === 'custom' ? 'block' : 'none';
+  const recurrence = document.getElementById('ddl-recurrence')?.value;
+  const customIntervalGroup = document.getElementById('custom-interval-group');
+  if (customIntervalGroup) {
+    customIntervalGroup.style.display = recurrence === 'custom' ? 'block' : 'none';
+  }
+}
+
+function updateCategoryDropdown() {
+  const type = document.getElementById('type')?.value;
+  const categoryGroup = document.getElementById('category-group');
+  const categorySelect = document.getElementById('category-select');
+  if (categoryGroup && categorySelect) {
+    categoryGroup.style.display = type === 'Expenses' ? 'block' : 'none';
+    categorySelect.value = type === 'Expenses' ? '' : '';
+  }
+}
+
+function updateDdlCategoryDropdown() {
+  const type = document.getElementById('ddl-type')?.value;
+  const categoryGroup = document.getElementById('ddl-category-group');
+  const categorySelect = document.getElementById('ddl-category');
+  if (categoryGroup && categorySelect) {
+    categoryGroup.style.display = type === 'Expenses' ? 'block' : 'none';
+    categorySelect.value = type === 'Expenses' ? '' : '';
+  }
 }
 
 function initializeCalendar() {
@@ -146,8 +172,10 @@ async function addTransaction(e) {
     description: document.getElementById('description').value,
     amount: parseFloat(document.getElementById('amount').value).toFixed(2),
     type: document.getElementById('type').value,
-    category: document.getElementById('category').value || ''
+    category: document.getElementById('category-select').value || ''
   };
+
+  console.log('Transaction data:', transaction);
 
   try {
     const response = await fetch('/api/transactions', {
@@ -157,13 +185,19 @@ async function addTransaction(e) {
     });
     if (!response.ok) throw new Error(await response.text());
 
-    const transactionId = (await response.json()).id || (await fetch('/api/transactions').then(r => r.json())).slice(-1)[0].$.id;
+    const responseData = await response.json();
+    const transactionId = responseData.id;
+    if (!transactionId) {
+      console.error('Transaction ID not received from server');
+      throw new Error('Transaction ID not received');
+    }
+    console.log('Transaction ID:', transactionId);
+
     document.getElementById('transaction-form').reset();
     updateCategoryDropdown();
 
-    if (transaction.type === 'Expenses' && ['For me', 'House'].includes(transaction.category)) {
-      await promptForRating(transactionId);
-    }
+    console.log('Prompting for rating for transaction:', transactionId);
+    await promptForRating(transactionId);
 
     loadTransactions();
   } catch (err) {
@@ -280,6 +314,22 @@ async function deleteDeadline(id) {
   }
 }
 
+async function deleteBudget(category, period) {
+  if (confirm('Delete this budget?')) {
+    try {
+      const response = await fetch(`/api/budgets/${encodeURIComponent(category)}/${encodeURIComponent(period)}`, {
+        method: 'DELETE'
+      });
+      if (!response.ok) throw new Error(await response.text());
+      loadTransactions();
+      loadBudgetOptions();
+    } catch (err) {
+      console.error('Error deleting budget:', err);
+      alert('Error deleting budget');
+    }
+  }
+}
+
 function loadTransactions() {
   if (isLoadingTransactions) return;
   isLoadingTransactions = true;
@@ -303,7 +353,6 @@ function loadTransactions() {
       const xslError = xslDoc.querySelector('parsererror');
       if (xslError) {
         console.error('XSLT parsing error:', xslError.textContent);
-        console.error('XSLT content:', xslData);
         throw new Error('XSLT parsing error: ' + xslError.textContent);
       }
 
@@ -320,9 +369,15 @@ function loadTransactions() {
       dashboard.innerHTML = '';
       dashboard.appendChild(resultDocument);
 
-      return fetch('/api/transactions')
-        .then(response => response.json())
-        .then(transactions => {
+      return Promise.all([
+        fetch('/api/transactions').then(response => response.json()),
+        fetch('/api/budgets').then(response => response.json()).catch(err => {
+          console.error('Error fetching budgets:', err);
+          return [];
+        })
+      ])
+        .then(([transactions, budgets]) => {
+          if (!budgets) budgets = [];
           const filteredTransactions = transactions.filter(t => 
             (categoryFilter === 'All' || t.type === categoryFilter) &&
             (secondaryCategoryFilter === 'All' || t.category === secondaryCategoryFilter || (t.category === '' && secondaryCategoryFilter === 'None'))
@@ -379,6 +434,27 @@ function loadTransactions() {
             });
 
             analyticsSummary.innerHTML = analyticsHTML;
+
+            const budgetList = document.getElementById('budget-list');
+            if (budgetList) {
+              budgetList.innerHTML = '';
+if (budgets.length === 0) {
+  budgetList.innerHTML = '<p>No budgets set.</p>';
+} else {
+  budgets.forEach(b => {
+    const budgetItem = document.createElement('div');
+    budgetItem.className = 'analytics-item budget-item';
+    budgetItem.innerHTML = `
+      <span>${b.period} Budget for ${b.category}:</span>
+      <span class="budget-amount">${parseFloat(b.amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+      <button class="btn btn-small btn-danger delete-budget-btn" data-category="${b.category}" data-period="${b.period}">Delete</button>
+    `;
+    budgetList.appendChild(budgetItem);
+  });
+}
+            } else {
+              console.error('Budget list element not found');
+            }
           }
 
           if (chartInstance) {
@@ -414,7 +490,7 @@ function loadTransactions() {
                   data: data,
                   backgroundColor: colors.slice(0, labels.length),
                   borderColor: '#fff',
-                  borderWidth: 2
+                  borderWidth: 1
                 }]
               },
               options: {
@@ -435,8 +511,8 @@ function loadTransactions() {
     })
     .catch(error => {
       console.error('Error loading transactions:', error);
-      document.getElementById('dashboard').innerHTML = `<p>Error: ${error.message}. Check console for details.</p>`;
-      document.getElementById('analytics-summary').innerHTML = `<p>Error: ${error.message}.</p>`;
+      document.getElementById('dashboard').innerHTML = `<p>Error: ${error.message}</p>`;
+      document.getElementById('analytics-summary').innerHTML = `<p>Error: ${error.message}</p>`;
     })
     .finally(() => {
       isLoadingTransactions = false;
@@ -449,9 +525,9 @@ function generateHappinessInsights(transactions) {
 
   const categoryStats = {};
   transactions
-    .filter(t => t.type === 'Expenses' && t.rating && t.category)
+    .filter(t => t.rating && t.rating !== '')
     .forEach(t => {
-      const category = t.category;
+      const category = t.category || 'Uncategorized';
       if (!categoryStats[category]) {
         categoryStats[category] = { totalRating: 0, totalAmount: 0, count: 0 };
       }
@@ -496,25 +572,29 @@ function generateHappinessInsights(transactions) {
 }
 
 function loadBudgetOptions() {
+  const budgetSelect = document.getElementById('budget-select');
+  if (!budgetSelect) {
+    console.error('Budget select element not found');
+    return;
+  }
   fetch('/api/budgets')
     .then(response => response.json())
     .then(budgets => {
-      const select = document.getElementById('budget-select');
-      select.innerHTML = '<option value="">New Budget</option>';
+      budgetSelect.innerHTML = '<option value="">New Budget</option>';
       budgets.forEach(b => {
         const option = document.createElement('option');
-        option.value = `${b.category}|${b.period}`;
-        option.text = `${b.category} (${b.period}): ${b.amount}`;
-        select.appendChild(option);
+        option.value = b.category + '|' + b.period;
+        option.textContent = `${b.period} Budget for ${b.category}: ${parseFloat(b.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+        budgetSelect.appendChild(option);
       });
     })
-    .catch(error => console.error('Error loading budgets:', error));
+    .catch(error => console.error('Error loading budget options:', error));
 }
 
 function loadBudget() {
-  const [category, period] = document.getElementById('budget-select').value.split('|') || ['', ''];
-  if (!category) {
-    document.getElementById('budget-category').value = 'Income';
+  const budgetSelect = document.getElementById('budget-select');
+  if (!budgetSelect || !budgetSelect.value) {
+    document.getElementById('budget-category').value = '';
     document.getElementById('budget-amount').value = '';
     document.getElementById('budget-period').value = 'monthly';
     return;
@@ -522,6 +602,7 @@ function loadBudget() {
   fetch('/api/budgets')
     .then(response => response.json())
     .then(budgets => {
+      const [category, period] = budgetSelect.value.split('|');
       const budget = budgets.find(b => b.category === category && b.period === period);
       if (budget) {
         document.getElementById('budget-category').value = budget.category;
@@ -534,29 +615,67 @@ function loadBudget() {
 
 function setBudget(event) {
   event.preventDefault();
+  const budgetSelect = document.getElementById('budget-select');
+  const budgetCategory = document.getElementById('budget-category');
+  const budgetAmount = document.getElementById('budget-amount');
+  const budgetPeriod = document.getElementById('budget-period');
+
+  if (!budgetSelect || !budgetCategory || !budgetAmount || !budgetPeriod) {
+    console.error('Form elements missing:', {
+      budgetSelect: !!budgetSelect,
+      budgetCategory: !!budgetCategory,
+      budgetAmount: !!budgetAmount,
+      budgetPeriod: !!budgetPeriod
+    });
+    alert('Form setup error. Check console.');
+    return;
+  }
+
   const budget = {
-    category: document.getElementById('budget-category').value,
-    amount: parseFloat(document.getElementById('budget-amount').value).toFixed(2),
-    period: document.getElementById('budget-period').value
+    id: budgetSelect.value || Date.now().toString(),
+    category: budgetCategory.value,
+    amount: parseFloat(budgetAmount.value).toFixed(2),
+    period: budgetPeriod.value
   };
-  if (isNaN(budget.amount) || budget.amount <= 0) {
+
+  console.log('Sending budget:', budget);
+
+  if (!budget.category) {
+    alert('Please enter a budget category');
+    return;
+  }
+  if (isNaN(budget.amount) || parseFloat(budget.amount) <= 0) {
     alert('Please enter a valid positive amount');
     return;
   }
+  if (!['weekly', 'monthly', 'yearly'].includes(budget.period)) {
+    alert('Please select a valid period');
+    return;
+  }
+
   fetch('/api/budgets', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(budget)
   })
     .then(response => {
-      if (!response.ok) throw new Error('Failed to set budget');
+      console.log('Server response status:', response.status);
+      if (!response.ok) {
+        return response.text().then(text => { throw new Error(text || 'Unknown server error'); });
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log('Server response data:', data);
       document.getElementById('budget-form').reset();
+      budgetSelect.value = '';
       loadBudgetOptions();
       loadTransactions();
+      alert('Budget set successfully');
     })
     .catch(error => {
       console.error('Error setting budget:', error);
-      alert('Failed to set budget');
+      alert(`Failed to set budget: ${error.message}`);
     });
 }
 
@@ -568,6 +687,10 @@ function attachButtonListeners() {
   document.querySelectorAll('.delete-btn').forEach(button => {
     button.removeEventListener('click', handleDelete);
     button.addEventListener('click', handleDelete);
+  });
+  document.querySelectorAll('.delete-budget-btn').forEach(button => {
+    button.removeEventListener('click', handleDeleteBudget);
+    button.addEventListener('click', handleDeleteBudget);
   });
 }
 
@@ -584,6 +707,12 @@ function handleDelete() {
   } else {
     deleteTransaction(id);
   }
+}
+
+function handleDeleteBudget() {
+  const category = this.dataset.category;
+  const period = this.dataset.period;
+  deleteBudget(category, period);
 }
 
 function exportTransactions(format = 'csv') {
@@ -639,7 +768,7 @@ function exportTransactions(format = 'csv') {
 
 async function editTransaction(id) {
   const newAmount = prompt('Enter new amount:');
-  const newRating = ['For me', 'House'].includes(document.querySelector(`[data-id="${id}"]`)?.closest('tr').querySelector('td:nth-child(6)')?.textContent) ? prompt('Enter new rating (1-5, or leave blank):') : null;
+  const newRating = ['For me', 'House'].includes(document.querySelector(`[data-id="${id}"]`)?.closest('tr')?.querySelector('td:nth-child(6)')?.textContent) ? prompt('Enter new rating (1-5, or leave blank):') : null;
   if (newAmount && !isNaN(parseFloat(newAmount))) {
     const updatedTransaction = { amount: parseFloat(newAmount).toFixed(2) };
     if (newRating !== null && (newRating === '' || (parseInt(newRating) >= 1 && parseInt(newRating) <= 5))) {
@@ -674,27 +803,5 @@ async function deleteTransaction(id) {
       console.error('Error deleting transaction:', err);
       alert('Error deleting transaction');
     }
-  }
-}
-
-function updateCategoryDropdown() {
-  const type = document.getElementById('type').value;
-  const categoryLabel = document.getElementById('category-label');
-  const categorySelect = document.getElementById('category');
-  if (categoryLabel && categorySelect) {
-    categoryLabel.style.display = type === 'Expenses' ? 'block' : 'none';
-    categorySelect.style.display = type === 'Expenses' ? 'block' : 'none';
-    categorySelect.value = type === 'Expenses' ? 'Chirie' : '';
-  }
-}
-
-function updateDdlCategoryDropdown() {
-  const type = document.getElementById('ddl-type').value;
-  const categoryLabel = document.getElementById('ddl-category-label');
-  const categorySelect = document.getElementById('ddl-category');
-  if (categoryLabel && categorySelect) {
-    categoryLabel.style.display = type === 'Expenses' ? 'block' : 'none';
-    categorySelect.style.display = type === 'Expenses' ? 'block' : 'none';
-    categorySelect.value = type === 'Expenses' ? 'Chirie' : '';
   }
 }
